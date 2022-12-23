@@ -1,0 +1,15 @@
+{:linters {:missing-docstring {:level :warning}
+           :redundant-fn-wrapper {:level :warning}
+           :shadowed-var {:level :warning
+                          :exclude [ref test]
+                          :suggest {key k val v keys ks}}
+           :unsorted-required-namespaces {:level :warning}}
+ :hooks {:analyze-call {rum.core/defc clj-kondo.rum/defc
+                        rum.core/defcs clj-kondo.rum/defcs}}
+ :lint-as {app.database.hugsql/def clojure.core/declare
+           mount.core/defstate clojure.core/def
+           mount.tools.macrovich/deftime clojure.core/do
+           rum.core/defcc rum.core/defc}
+ :config-in-comment {:linters {:redundant-expression {:level :off}
+                               :unresolved-namespace {:level :off}}}
+ :output {:exclude-files ["^dev\\\\user\\\\"]}}

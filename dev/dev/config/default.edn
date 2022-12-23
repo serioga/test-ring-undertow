@@ -1,0 +1,24 @@
+{:dev.env.system/config
+ {:dev.env.system.integrant/nrepl {:write-port-file ".nrepl-port"}
+
+  :dev.env.system.integrant/shadow-cljs {:builds-to-start [:example]}
+
+  :dev.env.system.integrant/app-reload
+  {:watcher {:handler {:ns-tracker-dirs ["src" "dev"]
+                       :always-reload-ns [app.database.core]
+                       :never-reload-ns []
+                       :never-reload-ns-in ["user"]}
+             :options {:dirs ["src" "dev" "resources/app"]
+                       ;; See http://docs.caudate.me/hara/hara-io-watch.html#watch-options
+                       ;; :filter will pick out only files that match this pattern.
+                       :files [".props$" ".clj$" ".cljc$" ".cljs$" ".sql$" ".xml$"]
+                       ;; See http://docs.caudate.me/hara/hara-io-watch.html#watch-options
+                       ;; :exclude will leave out files that match this pattern.
+                       :exclude ["dev\\\\user"]}}}
+
+  :dev.env.system.integrant/tailwind
+  {:webapp "example"
+   :watcher {:options {:dirs ["tailwind/app/config" "tailwind/app/$_example"]
+                       :files [".css" ".js$"]}}
+   :content-watcher {:options {:dirs ["src/app/$_example"] :files [".clj"]}}
+   :dependent-mount-states ["#'app.$-example.impl.html/styles-css-uri"]}}}
