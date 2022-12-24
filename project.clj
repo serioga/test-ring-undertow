@@ -13,11 +13,8 @@
                  [tolitius/mount-up "0.1.3"]
 
                  ;;; Web Server
-                 [io.undertow/undertow-core,,,,,,,,,, "2.2.16.Final"]
-                 [io.undertow/undertow-servlet,,,,,,, "2.2.16.Final"]
-                 [io.undertow/undertow-websockets-jsr "2.2.16.Final"]
+                 [com.github.strojure/ring-undertow "1.0.36-beta5"]
                  [metosin/reitit-core "0.5.17"]
-                 [org.immutant/web "2.1.10"]
                  [ring/ring-core "1.9.5"]
                  [ring/ring-defaults "0.3.3"]
 

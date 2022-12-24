@@ -51,14 +51,14 @@
                                                               :system-is-enabled true}
                                                      :import {:system-is-enabled "Feature.DatabaseSchemaUpdate"}}
 
-   :app.system.service/immutant-web #::config{:setup ::http-server-setup
-                                              :webapps {:app.system.service/homepage-http-handler #::config{:config {:name "example"}
-                                                                                                            :import {:hosts "Webapp.Hosts(example)"}}}
-                                              :config {:options {:host "0.0.0.0"}}
-                                              :import {:options {:host "HttpServer.Host"
-                                                                 :port "HttpServer.Port"}}
-                                              :awaits [:app.system.task/update-database-schema
-                                                       :app.system.service/mount]}})
+   :app.system.service/undertow #::config{:setup ::http-server-setup
+                                          :webapps {:app.system.service/homepage-http-handler #::config{:config {:name "example"}
+                                                                                                        :import {:hosts "Webapp.Hosts(example)"}}}
+                                          :config {:options {:host "0.0.0.0"}}
+                                          :import {:options {:host "HttpServer.Host"
+                                                             :port "HttpServer.Port"}}
+                                          :awaits [:app.system.task/update-database-schema
+                                                   :app.system.service/mount]}})
 
 (defn- system-config
   "Returns app system configuration."
@@ -115,7 +115,7 @@
 (defn- log-running-webapps
   "Log info about running webapps (URLs with host/port)."
   [system]
-  (let [webapps (some-> system :app.system.service/immutant-web meta :running-webapps)]
+  (let [webapps (some-> system :app.system.service/undertow meta :running-webapps)]
     (doseq [[webapp-name {:keys [host port ssl-port virtual-host]}] webapps
             webapp-host (cond (sequential? virtual-host) virtual-host
                               (string? virtual-host) [virtual-host]
