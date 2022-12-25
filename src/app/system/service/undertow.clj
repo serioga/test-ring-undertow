@@ -2,9 +2,8 @@
   (:require [integrant.core :as ig]
             [lib.clojure-tools-logging.logger :as logger]
             [lib.clojure.core :as c]
-            [strojure.ring-undertow.handler :as ring-handler]
-            [strojure.undertow.handler :as handler]
-            [strojure.undertow.server :as server]))
+            [strojure.ring-undertow.server :as server]
+            [strojure.undertow.handler :as handler]))
 
 (set! *warn-on-reflection* true)
 
@@ -13,7 +12,7 @@
 (defn- set-virtual-hosts
   [vhost-map, {webapp-name :name :as webapp}]
   (logger/debug (logger/get-logger *ns*) (c/pr-str* "Start webapp" webapp-name (webapp :options)))
-  (let [handler (ring-handler/ring-sync (webapp :handler))]
+  (let [handler (webapp :handler)]
     (reduce (fn [m host] (assoc m host handler))
             vhost-map (webapp :hosts))))
 
