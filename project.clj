@@ -13,10 +13,11 @@
                  [tolitius/mount-up "0.1.3"]
 
                  ;;; Web Server
+                 [com.github.strojure/ring-control "1.0.48-beta2"]
                  [com.github.strojure/ring-undertow "1.0.45-beta7"]
                  [metosin/reitit-core "0.5.17"]
                  [ring/ring-core "1.9.5"]
-                 [ring/ring-defaults "0.3.3"]
+                 [ring/ring-defaults "0.3.4"]
 
                  ;;; Database
                  [com.h2database/h2 "2.1.210"]

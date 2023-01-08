@@ -41,20 +41,27 @@
 
 ;;••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
 
+(defn route-tag-request
+  "Adds route-tag data in request. Returns `(fn [request])` for 1-arity."
+  ([reitit-router]
+   (assert (reitit/router? reitit-router))
+   (fn [request]
+     (route-tag-request request reitit-router)))
+  ([request reitit-router]
+   (let [match (reitit/match-by-path reitit-router, (request :uri))
+         route-tag (-> match :data :name)
+         path-params (-> match :path-params not-empty)]
+     (cond-> (assoc request :route-tag/path-for-route (path-for-route-fn reitit-router))
+       route-tag,, (assoc :route-tag route-tag)
+       path-params (update :params (fn merge-route-params [params]
+                                     (p/merge-not-empty params path-params)))))))
+
 (defn wrap-route-tag
   "Wrap handler with route-tag functionality."
   [handler, reitit-router]
-
   {:pre [(reitit/router? reitit-router)]}
-
   (fn route-tag
     [request]
-    (let [match (reitit/match-by-path reitit-router, (request :uri))
-          route-tag (-> match :data :name)
-          path-params (-> match :path-params not-empty)]
-      (handler (cond-> (assoc request :route-tag/path-for-route (path-for-route-fn reitit-router))
-                 route-tag,, (assoc :route-tag route-tag)
-                 path-params (update :params (fn merge-route-params [params]
-                                               (p/merge-not-empty params path-params))))))))
+    (handler (route-tag-request request reitit-router))))
 
 ;;••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••

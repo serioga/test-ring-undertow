@@ -7,7 +7,8 @@
             [lib.ring-middleware.route-tag-reitit :as route-tag]
             [lib.slf4j.mdc :as mdc]
             [reitit.core :as reitit]
-            [ring.middleware.defaults :as defaults])
+            [strojure.ring-control.config.ring-middleware-defaults :as ring-defaults]
+            [strojure.ring-control.handler :as handler])
   (:import (java.util UUID)))
 
 (set! *warn-on-reflection* true)
@@ -26,7 +27,40 @@
 
 ;;••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
 
+(defn- wrap-error-exception
+  [dev-mode]
+  {:name `wrap-error-exception
+   :wrap (fn [handler]
+           (error-exception/wrap-error-exception handler dev-mode))})
+
+(defn- req-route-tag
+  [reitit-router]
+  {:name `req-route-tag
+   :enter (route-tag/route-tag-request reitit-router)})
+
 (defn- wrap-mdc
+  []
+  {:name `wrap-mdc
+   :wrap (fn [handler]
+           (fn [request]
+             (with-open [_ (mdc/put-closeable "hostname" (request :server-name))
+                         _ (mdc/put-closeable "route-tag" (some-> (request :route-tag) (str)))
+                         _ (mdc/put-closeable "session" (some-> (request :session) (str)))
+                         _ (mdc/put-closeable "request-id" (.toString (UUID/randomUUID)))]
+               (handler request))))})
+
+(defn- wrap-debug-response
+  []
+  {:name `wrap-debug-response
+   :wrap debug-response/wrap-response-logger})
+
+(defn- resp-error-not-found
+  [dev-mode]
+  {:name `resp-error-not-found
+   :leave (fn [response request]
+            (error-not-found/error-not-found-response response request dev-mode))})
+
+#_(defn- wrap-mdc-
   [handler]
   (fn [request]
     (with-open [_ (mdc/put-closeable "hostname" (request :server-name))
@@ -35,18 +69,40 @@
                 _ (mdc/put-closeable "request-id" (.toString (UUID/randomUUID)))]
       (handler request))))
 
+#_(defn webapp-http-handler
+    "Build HTTP server handler for webapp with common middleware."
+    [http-handler, routes, {:keys [dev-mode]}]
+    (-> http-handler
+        (error-not-found/wrap-error-not-found dev-mode)
+        (debug-response/wrap-response-logger)
+        (wrap-mdc-)
+        (route-tag/wrap-route-tag (reitit/router routes))
+        (defaults/wrap-defaults (-> defaults/site-defaults
+                                    (assoc-in [:security :anti-forgery] false)
+                                    (assoc-in [:security :frame-options] false)
+                                    (dissoc :session)))
+        (error-exception/wrap-error-exception dev-mode)))
+
 (defn webapp-http-handler
   "Build HTTP server handler for webapp with common middleware."
   [http-handler, routes, {:keys [dev-mode]}]
-  (-> http-handler
-      (error-not-found/wrap-error-not-found dev-mode)
-      (debug-response/wrap-response-logger)
-      (wrap-mdc)
-      (route-tag/wrap-route-tag (reitit/router routes))
-      (defaults/wrap-defaults (-> defaults/site-defaults
-                                  (assoc-in [:security :anti-forgery] false)
-                                  (assoc-in [:security :frame-options] false)
-                                  (dissoc :session)))
-      (error-exception/wrap-error-exception dev-mode)))
+  (let [config [[(wrap-error-exception dev-mode)]
+                (ring-defaults/config
+                  {:params {:urlencoded true
+                            :multipart true
+                            :keywordize true}
+                   :cookies true
+                   :security {:xss-protection {:enable? true, :mode :block}
+                              :content-type-options :nosniff}
+                   :static {:resources "public"}
+                   :responses {:not-modified-responses true
+                               :absolute-redirects true
+                               :content-types true
+                               :default-charset "utf-8"}})
+                [(req-route-tag (reitit/router routes))
+                 (wrap-mdc)
+                 (wrap-debug-response)
+                 (resp-error-not-found dev-mode)]]]
+    (handler/build http-handler (apply concat config))))
 
 ;;••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
