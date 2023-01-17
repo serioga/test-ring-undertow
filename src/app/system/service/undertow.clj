@@ -24,6 +24,7 @@
                                              (prepare-webapp webapp)))
                               webapps)]
     (-> (server/start {:handler [{:type handler/graceful-shutdown}
+                                 {:type handler/resource :resource-manager :classpath-files}
                                  {:type handler/proxy-peer-address}
                                  {:type handler/virtual-host
                                   :host (reduce set-virtual-hosts {} running-webapps)}]

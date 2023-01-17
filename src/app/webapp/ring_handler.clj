@@ -94,7 +94,6 @@
                    :cookies true
                    :security {:xss-protection {:enable? true, :mode :block}
                               :content-type-options :nosniff}
-                   :static {:resources "public"}
                    :responses {:not-modified-responses true
                                :absolute-redirects true
                                :content-types true
