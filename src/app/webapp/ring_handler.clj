@@ -61,13 +61,13 @@
             (error-not-found/error-not-found-response response request dev-mode))})
 
 #_(defn- wrap-mdc-
-  [handler]
-  (fn [request]
-    (with-open [_ (mdc/put-closeable "hostname" (request :server-name))
-                _ (mdc/put-closeable "route-tag" (some-> (request :route-tag) (str)))
-                _ (mdc/put-closeable "session" (some-> (request :session) (str)))
-                _ (mdc/put-closeable "request-id" (.toString (UUID/randomUUID)))]
-      (handler request))))
+    [handler]
+    (fn [request]
+      (with-open [_ (mdc/put-closeable "hostname" (request :server-name))
+                  _ (mdc/put-closeable "route-tag" (some-> (request :route-tag) (str)))
+                  _ (mdc/put-closeable "session" (some-> (request :session) (str)))
+                  _ (mdc/put-closeable "request-id" (.toString (UUID/randomUUID)))]
+        (handler request))))
 
 #_(defn webapp-http-handler
     "Build HTTP server handler for webapp with common middleware."
@@ -94,10 +94,8 @@
                    :cookies true
                    :security {:xss-protection {:enable? true, :mode :block}
                               :content-type-options :nosniff}
-                   :responses {:not-modified-responses true
-                               :absolute-redirects true
-                               :content-types true
-                               :default-charset "utf-8"}})
+                   #_#_:responses {:not-modified-responses true
+                                   :absolute-redirects true}})
                 [(req-route-tag (reitit/router routes))
                  (wrap-mdc)
                  (wrap-debug-response)
