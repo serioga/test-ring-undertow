@@ -14,6 +14,7 @@
 
                  ;;; Web Server
                  [com.github.strojure/ring-control "1.0.48-beta2"]
+                 [com.github.strojure/ring-lib "1.0.12-beta1"]
                  [com.github.strojure/ring-undertow "1.0.52-beta8"]
                  [com.github.strojure/undertow "1.0.72-rc2"]
                  [metosin/reitit-core "0.5.17"]

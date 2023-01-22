@@ -8,7 +8,8 @@
             [lib.slf4j.mdc :as mdc]
             [reitit.core :as reitit]
             [strojure.ring-control.config.ring-middleware-defaults :as ring-defaults]
-            [strojure.ring-control.handler :as handler])
+            [strojure.ring-control.handler :as handler]
+            [strojure.ring-lib.middleware.params :as params])
   (:import (java.util UUID)))
 
 (set! *warn-on-reflection* true)
@@ -32,6 +33,11 @@
   {:name `wrap-error-exception
    :wrap (fn [handler]
            (error-exception/wrap-error-exception handler dev-mode))})
+
+(defn- req-params
+  [opts]
+  {:name `req-params
+   :enter (params/params-request-fn opts)})
 
 (defn- req-route-tag
   [reitit-router]
@@ -88,7 +94,7 @@
   [http-handler, routes, {:keys [dev-mode]}]
   (let [config [[(wrap-error-exception dev-mode)]
                 (ring-defaults/config
-                  {:params {:urlencoded true
+                  {#_#_:params {:urlencoded true
                             :multipart true
                             :keywordize true}
                    :cookies true
@@ -96,7 +102,8 @@
                               :content-type-options :nosniff}
                    #_#_:responses {:not-modified-responses true
                                    :absolute-redirects true}})
-                [(req-route-tag (reitit/router routes))
+                [(req-params {:param-key-fn keyword})
+                 (req-route-tag (reitit/router routes))
                  (wrap-mdc)
                  (wrap-debug-response)
                  (resp-error-not-found dev-mode)]]]

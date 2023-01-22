@@ -1,6 +1,7 @@
 (ns lib.ring-middleware.route-tag-reitit
   (:require [lib.clojure.perf :as p]
-            [reitit.core :as reitit]))
+            [reitit.core :as reitit]
+            [strojure.zmap.core :as zmap]))
 
 (set! *warn-on-reflection* true)
 
@@ -53,8 +54,9 @@
          path-params (-> match :path-params not-empty)]
      (cond-> (assoc request :route-tag/path-for-route (path-for-route-fn reitit-router))
        route-tag,, (assoc :route-tag route-tag)
-       path-params (update :params (fn merge-route-params [params]
-                                     (p/merge-not-empty params path-params)))))))
+       path-params (-> (assoc :path-params path-params)
+                       (zmap/update :url-params (fn merge-route-params [params]
+                                                  (p/merge-not-empty params path-params))))))))
 
 (defn wrap-route-tag
   "Wrap handler with route-tag functionality."
