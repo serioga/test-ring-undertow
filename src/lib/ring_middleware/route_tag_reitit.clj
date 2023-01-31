@@ -55,8 +55,8 @@
      (cond-> (assoc request :route-tag/path-for-route (path-for-route-fn reitit-router))
        route-tag,, (assoc :route-tag route-tag)
        path-params (-> (assoc :path-params path-params)
-                       (zmap/update :url-params (fn merge-route-params [params]
-                                                  (p/merge-not-empty params path-params))))))))
+                       (zmap/update :path-or-query-params (fn merge-route-params [params]
+                                                            (p/merge-not-empty params path-params))))))))
 
 (defn wrap-route-tag
   "Wrap handler with route-tag functionality."

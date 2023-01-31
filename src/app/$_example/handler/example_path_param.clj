@@ -15,7 +15,7 @@
 (defmethod impl/example-handler :route/example-path-param
   [request]
   (let [title "Path Parameter example"
-        {name-param :name value-param :value} (:url-params request)]
+        {name-param :name value-param :value} (:path-or-query-params request)]
     (-> [:html [:head
                 [:title title]
                 (html/include-app-css)]
