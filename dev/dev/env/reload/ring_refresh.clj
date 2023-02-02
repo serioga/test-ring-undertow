@@ -1,9 +1,7 @@
 (ns dev.env.reload.ring-refresh
-  (:require [compojure.core :as compojure]
-            [lib.clojure-tools-logging.logger :as logger]
-            [ring.middleware.params :as params]
+  (:require [lib.clojure-tools-logging.logger :as logger]
             [ring.middleware.refresh :as refresh])
-  (:import (java.util UUID Date)))
+  (:import (java.util Date UUID)))
 
 (set! *warn-on-reflection* true)
 
@@ -27,21 +25,28 @@
       (finally
         (remove-watch state! watch-key)))))
 
-(def ^:private source-changed-route
-  (compojure/GET "/__source_changed" [since]
-    (let [timestamp (Long/parseLong since)]
-      (str (watch-until refresh-state! (fn [{::keys [last-modified, refresh-is-enabled]}]
-                                         (when (> (.getTime ^Date last-modified) timestamp)
-                                           refresh-is-enabled))
-                        60000)))))
-
 ;;••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
 
 (defn wrap-refresh
-  "Modified `ring.middleware.refresh/wrap-refresh`."
+  "Modified `ring.middleware.refresh/wrap-refresh` without dependency on
+  compojure and `params` middleware."
   [handler]
-  (params/wrap-params (compojure/routes source-changed-route
-                                        (@#'refresh/wrap-with-script handler @#'refresh/refresh-script))))
+  (let [handler (-> handler (@#'refresh/wrap-with-script @#'refresh/refresh-script))]
+    (fn [request]
+      (if (= "/__source_changed" (:uri request))
+        (let [body (if-let [since (some->> (:query-string request)
+                                           (re-find #"since=(\d+)")
+                                           (second)
+                                           (Long/parseLong))]
+                     (watch-until refresh-state!
+                                  (fn [{::keys [last-modified, refresh-is-enabled]}]
+                                    (when (> (.getTime ^Date last-modified) since)
+                                      refresh-is-enabled))
+                                  60000)
+                     false)]
+          {:headers {"Content-Type" "text/html; charset=utf-8"}
+           :status 200 :body (str body)})
+        (handler request)))))
 
 ;;••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
 
