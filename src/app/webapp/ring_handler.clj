@@ -95,16 +95,17 @@
   (let [config [[(wrap-error-exception dev-mode)]
                 (ring-defaults/config
                   {#_#_:params {:urlencoded true
-                            :multipart true
-                            :keywordize true}
-                   :cookies true
-                   :security {:xss-protection {:enable? true, :mode :block}
-                              :content-type-options :nosniff}
+                                :multipart true
+                                :keywordize true}
+                   :cookies true                            ; + 1.3 µs (without cookie header)
+                   :security                                ; + 0.6 µs
+                   {:xss-protection {:enable? true, :mode :block}
+                    :content-type-options :nosniff}
                    #_#_:responses {:not-modified-responses true
                                    :absolute-redirects true}})
-                [(req-params {:param-key-fn keyword})
-                 (req-route-tag (reitit/router routes))
-                 (wrap-mdc)
+                [(req-params {:param-key-fn keyword})       ; + 1.0 µs
+                 (req-route-tag (reitit/router routes))     ; + 2.5 µs
+                 (wrap-mdc)                                 ; + 1.2 µs
                  (wrap-debug-response)
                  (resp-error-not-found dev-mode)]]]
     (handler/build http-handler (apply concat config))))

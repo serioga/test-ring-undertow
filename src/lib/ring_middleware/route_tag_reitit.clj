@@ -49,14 +49,15 @@
    (fn [request]
      (route-tag-request request reitit-router)))
   ([request reitit-router]
-   (let [match (reitit/match-by-path reitit-router, (request :uri))
+   (let [match (reitit/match-by-path reitit-router (request :uri))
          route-tag (-> match :data :name)
          path-params (-> match :path-params not-empty)]
      (cond-> (assoc request :route-tag/path-for-route (path-for-route-fn reitit-router))
        route-tag,, (assoc :route-tag route-tag)
        path-params (-> (assoc :path-params path-params)
                        (zmap/update :path-or-query-params (fn merge-route-params [params]
-                                                            (p/merge-not-empty params path-params))))))))
+                                                            (p/merge-not-empty params path-params)))
+                       (zmap/wrap))))))
 
 (defn wrap-route-tag
   "Wrap handler with route-tag functionality."
