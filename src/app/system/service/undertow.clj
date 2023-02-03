@@ -3,7 +3,9 @@
             [lib.clojure-tools-logging.logger :as logger]
             [lib.clojure.core :as c]
             [strojure.ring-undertow.server :as server]
-            [strojure.undertow.handler :as handler]))
+            [strojure.undertow.handler :as handler])
+  (:import (io.undertow.server HttpHandler)
+           (io.undertow.server.handlers SetHeaderHandler)))
 
 (set! *warn-on-reflection* true)
 
@@ -16,6 +18,10 @@
     (reduce (fn [m host] (assoc m host handler))
             vhost-map (webapp :hosts))))
 
+(defn- set-header
+  [^String header, ^String value]
+  #(SetHeaderHandler. ^HttpHandler % header value))
+
 (defn- start-server
   [{:keys [options, webapps, dev/prepare-webapp]}]
   (let [{:keys [host port]} options
@@ -24,6 +30,7 @@
                                              (prepare-webapp webapp)))
                               webapps)]
     (-> (server/start {:handler [{:type handler/graceful-shutdown}
+                                 (set-header "X-Content-Type-Options" "nosniff")
                                  {:type handler/resource :resource-manager :classpath-files}
                                  {:type handler/proxy-peer-address}
                                  {:type handler/virtual-host

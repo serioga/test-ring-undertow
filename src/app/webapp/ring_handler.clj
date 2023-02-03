@@ -98,8 +98,7 @@
                                 :multipart true
                                 :keywordize true}
                    :cookies true                            ; + 1.3 µs (without cookie header)
-                   :security                                ; + 0.? µs
-                   {:content-type-options :nosniff}
+                   #_#_:security {:content-type-options :nosniff}
                    #_#_:responses {:not-modified-responses true
                                    :absolute-redirects true}})
                 [(req-params {:param-key-fn keyword})       ; + 1.0 µs
