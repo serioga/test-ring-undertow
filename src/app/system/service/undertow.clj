@@ -4,8 +4,8 @@
             [lib.clojure.core :as c]
             [strojure.ring-undertow.server :as server]
             [strojure.undertow.handler :as handler])
-  (:import (io.undertow.server HttpHandler)
-           (io.undertow.server.handlers SetHeaderHandler)))
+  (:import (io.undertow.server HttpHandler ResponseCommitListener)
+           (io.undertow.util Headers)))
 
 (set! *warn-on-reflection* true)
 
@@ -18,9 +18,18 @@
     (reduce (fn [m host] (assoc m host handler))
             vhost-map (webapp :hosts))))
 
-(defn- set-header
-  [^String header, ^String value]
-  #(SetHeaderHandler. ^HttpHandler % header value))
+(defn- set-content-type-options
+  []
+  (let [listener (reify ResponseCommitListener
+                   (beforeCommit [_ exchange]
+                     (let [headers (.getResponseHeaders exchange)]
+                       (when (.contains headers Headers/CONTENT_TYPE)
+                         (.put headers Headers/X_CONTENT_TYPE_OPTIONS "nosniff")))))]
+    (fn [^HttpHandler handler]
+      (reify HttpHandler
+        (handleRequest [_ exchange]
+          (.addResponseCommitListener exchange listener)
+          (.handleRequest handler exchange))))))
 
 (defn- start-server
   [{:keys [options, webapps, dev/prepare-webapp]}]
@@ -30,7 +39,7 @@
                                              (prepare-webapp webapp)))
                               webapps)]
     (-> (server/start {:handler [{:type handler/graceful-shutdown}
-                                 (set-header "X-Content-Type-Options" "nosniff")
+                                 (set-content-type-options)
                                  {:type handler/resource :resource-manager :classpath-files}
                                  {:type handler/proxy-peer-address}
                                  {:type handler/virtual-host
