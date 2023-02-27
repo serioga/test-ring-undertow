@@ -4,7 +4,7 @@
             [lib.clojure.core :as c]
             [strojure.ring-undertow.server :as server]
             [strojure.undertow.handler :as handler])
-  (:import (io.undertow.server HttpHandler HttpServerExchange ResponseCommitListener)
+  (:import (io.undertow.server HttpServerExchange)
            (io.undertow.util Headers)))
 
 (set! *warn-on-reflection* true)
@@ -17,26 +17,6 @@
   (let [handler (webapp :handler)]
     (reduce (fn [m host] (assoc m host handler))
             vhost-map (webapp :hosts))))
-
-(defn- as-response-commit-listener
-  [f]
-  (reify ResponseCommitListener
-    (beforeCommit [_ exchange] (doto exchange (f)))))
-
-(defn- add-response-commit-listener
-  [exchange, f]
-  (doto ^HttpServerExchange exchange
-    (.addResponseCommitListener (as-response-commit-listener f))))
-
-(defn- before-response-commit
-  ([f]
-   (fn [handler]
-     (before-response-commit handler f)))
-  ([^HttpHandler handler, f]
-   (reify HttpHandler
-     (handleRequest [_ exchange]
-       (add-response-commit-listener exchange f)
-       (.handleRequest handler exchange)))))
 
 (defn- set-content-type-options
   [^HttpServerExchange exchange]
@@ -52,7 +32,7 @@
                                              (prepare-webapp webapp)))
                               webapps)]
     (-> (server/start {:handler [{:type handler/graceful-shutdown}
-                                 (before-response-commit set-content-type-options)
+                                 {:type handler/on-response-commit :listener set-content-type-options}
                                  {:type handler/resource :resource-manager :classpath-files}
                                  {:type handler/proxy-peer-address}
                                  {:type handler/virtual-host
