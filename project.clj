@@ -16,8 +16,8 @@
                  [com.github.strojure/ring-control "1.0.52"]
                  [com.github.strojure/ring-lib "1.0.17-beta2"]
                  [com.github.strojure/ring-undertow "1.0.86"]
-                 [metosin/reitit-core "0.5.17"]
-                 [ring/ring-core "1.9.5"]
+                 [metosin/reitit-core "0.6.0"]
+                 [ring/ring-core "1.9.6"]
                  [ring/ring-defaults "0.3.4"]
 
                  ;;; Database
@@ -84,8 +84,8 @@
                    :dependencies [[me.raynes/fs "1.4.6"]
                                   [nrepl "0.9.0"]
                                   [ns-tracker "0.4.0"]
-                                  [ring-refresh "0.1.2"]
-                                  [ring/ring-devel "1.9.5"]
+                                  [ring-refresh "0.1.3"]
+                                  [ring/ring-devel "1.9.6"]
                                   [zcaudate/hara.io.watch "2.8.7"]]
                    :source-paths ["dev" "tailwind"]}
 
