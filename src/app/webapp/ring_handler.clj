@@ -101,7 +101,7 @@
                    #_#_:security {:content-type-options :nosniff}
                    #_#_:responses {:not-modified-responses true
                                    :absolute-redirects true}})
-                [(req-params {:param-key-fn keyword})       ; + 1.0 µs
+                [(req-params {:param-name-fn keyword})      ; + 1.0 µs
                  (req-route-tag (reitit/router routes))     ; + 2.5 µs
                  (wrap-mdc)                                 ; + 1.2 µs
                  (wrap-debug-response)
