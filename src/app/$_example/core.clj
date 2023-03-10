@@ -33,7 +33,7 @@
                        "accept-encoding" "gzip, deflate",
                        "accept-language" "ru,en;q=0.8,de;q=0.6,uk;q=0.4,be;q=0.2",
                        "connection" "keep-alive",
-                       #_#_"cookie" "JSESSIONID=Mpk7s_F3vXFJs0pUHhxy00OSha6Z9xu1pnDPrmNr",
+                       "cookie" "JSESSIONID=Mpk7s_F3vXFJs0pUHhxy00OSha6Z9xu1pnDPrmNr",
                        "host" "example.localtest.me:8080",
                        "referer" "http://example.localtest.me:8080/",
                        "sec-gpc" "1",
@@ -49,6 +49,7 @@
   (def -h (ring-handler/webapp-http-handler (fn [_] {:status 200}) (example-routes)
                                             {:dev-mode true, :hosts #{"example.localtest.me"}, :name "example"}))
   (-h -req)
+  ;; Execution time mean : 5.394125 µs
   )
 
 ;;,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

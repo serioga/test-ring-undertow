@@ -7,8 +7,8 @@
             [lib.ring-middleware.route-tag-reitit :as route-tag]
             [lib.slf4j.mdc :as mdc]
             [reitit.core :as reitit]
-            [strojure.ring-control.config.ring-middleware-defaults :as ring-defaults]
             [strojure.ring-control.handler :as handler]
+            [strojure.ring-lib.middleware.cookies :as cookies]
             [strojure.ring-lib.middleware.params :as params])
   (:import (java.util UUID)))
 
@@ -43,6 +43,12 @@
   [reitit-router]
   {:name `req-route-tag
    :enter (route-tag/route-tag-request reitit-router)})
+
+(defn- wrap-cookies
+  []
+  {:name `wrap-cookies
+   :enter (cookies/cookies-request-fn {})
+   :leave (cookies/cookies-response-fn {})})
 
 (defn- wrap-mdc
   []
@@ -92,20 +98,13 @@
 (defn webapp-http-handler
   "Build HTTP server handler for webapp with common middleware."
   [http-handler, routes, {:keys [dev-mode]}]
-  (let [config [[(wrap-error-exception dev-mode)]
-                (ring-defaults/config
-                  {#_#_:params {:urlencoded true
-                                :multipart true
-                                :keywordize true}
-                   :cookies true                            ; + 1.3 µs (without cookie header)
-                   #_#_:security {:content-type-options :nosniff}
-                   #_#_:responses {:not-modified-responses true
-                                   :absolute-redirects true}})
-                [(req-params {:param-name-fn keyword})      ; + 1.0 µs
-                 (req-route-tag (reitit/router routes))     ; + 2.5 µs
-                 (wrap-mdc)                                 ; + 1.2 µs
-                 (wrap-debug-response)
-                 (resp-error-not-found dev-mode)]]]
-    (handler/build http-handler (apply concat config))))
+  (let [config [(wrap-error-exception dev-mode)
+                (req-params {:param-name-fn keyword})       ; + 1.0 µs
+                (req-route-tag (reitit/router routes))      ; + 2.5 µs
+                (wrap-mdc)                                  ; + 1.2 µs
+                (wrap-debug-response)
+                (wrap-cookies)
+                (resp-error-not-found dev-mode)]]
+    (handler/build http-handler config)))
 
 ;;••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••

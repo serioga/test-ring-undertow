@@ -13,9 +13,9 @@
                  [tolitius/mount-up "0.1.3"]
 
                  ;;; Web Server
-                 [com.github.strojure/ring-control "1.0.52"]
-                 [com.github.strojure/ring-lib "1.0.28"]
-                 [com.github.strojure/ring-undertow "1.0.86"]
+                 [com.github.strojure/ring-control "1.0.59"]
+                 [com.github.strojure/ring-lib "1.1.0-39"]
+                 [com.github.strojure/ring-undertow "1.0.96"]
                  [metosin/reitit-core "0.6.0"]
                  [ring/ring-core "1.9.6"]
                  [ring/ring-defaults "0.3.4"]
