@@ -58,12 +58,13 @@
 
 #?(:clj (defn react-mount-data-js
           "Hiccup for JS with data for mounting react components."
-          [react-data]
+          [react-data nonce]
           [:script {:dangerouslySetInnerHTML
                     {:__html (str "window." data-js-var "=`"
                                   (-> (transit'/write-transit-string react-data)
                                       (string/replace "\\" "\\\\")
                                       (string/replace "`" "\\`"))
-                                  "`;")}}]))
+                                  "`;")}
+                    :nonce nonce}]))
 
 ;;••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••

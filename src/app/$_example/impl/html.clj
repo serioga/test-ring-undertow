@@ -1,7 +1,8 @@
 (ns app.$-example.impl.html
   (:require [app.html.core :as html]
             [lib.ring-util.response :as ring.response']
-            [mount.core :as mount]))
+            [mount.core :as mount]
+            [strojure.undertow.handler.csp :as csp]))
 
 (set! *warn-on-reflection* true)
 
@@ -21,8 +22,8 @@
 
 (defn include-app-js
   "Hiccup including main.js."
-  []
-  (html/include-js "/app/example/main.js"))
+  [nonce]
+  (html/include-js "/app/example/main.js" nonce))
 
 ;;••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
 
@@ -41,3 +42,11 @@
       (ring.response'/html)))
 
 ;;••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
+
+(defn csp-nonce
+  "Returns CSP nonce attached to request."
+  [request]
+  (-> request :server-exchange csp/get-request-nonce))
+
+;;••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
+

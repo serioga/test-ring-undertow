@@ -54,7 +54,8 @@
    :app.system.service/undertow #::config{:setup ::http-server-setup
                                           :webapps {:app.system.service/homepage-http-handler #::config{:config {:name "example"}
                                                                                                         :import {:hosts "Webapp.Hosts(example)"}}}
-                                          :config {:options {:host "0.0.0.0"}}
+                                          :config {:options {:host "0.0.0.0"}
+                                                   :dev-mode (ig/ref ::dev-mode)}
                                           :import {:options {:host "HttpServer.Host"
                                                              :port "HttpServer.Port"}}
                                           :awaits [:app.system.task/update-database-schema

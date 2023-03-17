@@ -25,7 +25,7 @@
       (.put headers Headers/X_CONTENT_TYPE_OPTIONS "nosniff"))))
 
 (defn- start-server
-  [{:keys [options, webapps, dev/prepare-webapp]}]
+  [{:keys [options, webapps, dev/prepare-webapp, dev-mode]}]
   (let [{:keys [host port]} options
         prepare-webapp (or prepare-webapp identity)
         running-webapps (keep (fn [webapp] (when (get webapp :webapp-is-enabled true)
@@ -35,6 +35,18 @@
                                  {:type handler/on-response-commit :listener set-content-type-options}
                                  {:type handler/resource :resource-manager :classpath-files}
                                  {:type handler/proxy-peer-address}
+                                 {:type handler/security
+                                  :csp {:policy
+                                        (cond-> {"default-src" :none
+                                                 "script-src" ["http:" "https:" :nonce :strict-dynamic :unsafe-inline]
+                                                 "style-src" [:self :unsafe-inline]
+                                                 "img-src" :self
+                                                 "base-uri" :self
+                                                 "form-action" :self
+                                                 "frame-ancestors" :none}
+                                          dev-mode
+                                          (-> (update "script-src" conj :unsafe-eval)
+                                              (assoc "connect-src" [:self "ws:"])))}}
                                  {:type handler/virtual-host
                                   :host (reduce set-virtual-hosts {} running-webapps)}]
                        :port {port {:host host}}})

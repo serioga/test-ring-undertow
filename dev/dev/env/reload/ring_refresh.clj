@@ -1,6 +1,8 @@
 (ns dev.env.reload.ring-refresh
-  (:require [lib.clojure-tools-logging.logger :as logger]
-            [ring.middleware.refresh :as refresh])
+  (:require [clojure.string :as string]
+            [lib.clojure-tools-logging.logger :as logger]
+            [ring.middleware.refresh :as refresh]
+            [strojure.undertow.handler.csp :as csp])
   (:import (java.util Date UUID)))
 
 (set! *warn-on-reflection* true)
@@ -27,11 +29,24 @@
 
 ;;••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
 
+(defn- wrap-add-csp-nonce
+  [handler]
+  (fn [request]
+    (let [nonce (-> request :server-exchange csp/get-request-nonce)
+          response (handler request)
+          body (:body response)]
+      (cond-> response
+        (and nonce (string? body))
+        (assoc :body (string/replace-first body "<script type=\"text/javascript\">"
+                                           (str "<script nonce=\"" nonce "\" type=\"text/javascript\">")))))))
+
 (defn wrap-refresh
   "Modified `ring.middleware.refresh/wrap-refresh` without dependency on
   compojure and `params` middleware."
   [handler]
-  (let [handler (-> handler (@#'refresh/wrap-with-script @#'refresh/refresh-script))]
+  (let [handler (-> handler
+                    (@#'refresh/wrap-with-script @#'refresh/refresh-script)
+                    (wrap-add-csp-nonce))]
     (fn [request]
       (if (= "/__source_changed" (:uri request))
         (let [body (if-let [since (some->> (:query-string request)

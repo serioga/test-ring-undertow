@@ -25,8 +25,8 @@
           [:h1 title]
           (mount-component :react-component/hello-world {:name "World"})
           (html/link-to-index)
-          (rum.mount/react-mount-data-js @components!)
-          (html/include-app-js)]]
+          (rum.mount/react-mount-data-js @components! (html/csp-nonce request))
+          (html/include-app-js (html/csp-nonce request))]]
         (html/response))))
 
 ;;••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••

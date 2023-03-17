@@ -16,6 +16,7 @@
                  [com.github.strojure/ring-control "1.0.59"]
                  [com.github.strojure/ring-lib "1.1.0-39"]
                  [com.github.strojure/ring-undertow "1.0.96"]
+                 [com.github.strojure/undertow "1.1.0-97-beta1"]
                  [metosin/reitit-core "0.6.0"]
                  [ring/ring-core "1.9.6"]
                  [ring/ring-defaults "0.3.4"]

@@ -24,11 +24,10 @@
 
 (defn include-js
   "Hiccup to include external JS."
-  ([src]
-   (include-js src nil))
-  ([src, defer-or-async]
-   (list [:script {:type "text/javascript"
-                   :src src
+  ([src nonce]
+   (include-js src nonce nil))
+  ([src, nonce, defer-or-async]
+   (list [:script {:type "text/javascript" :src src :nonce nonce
                    :defer (= :defer defer-or-async)
                    :async (= :async defer-or-async)}])))
 
