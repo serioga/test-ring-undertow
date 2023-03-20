@@ -3,9 +3,7 @@
             [lib.clojure-tools-logging.logger :as logger]
             [lib.clojure.core :as c]
             [strojure.ring-undertow.server :as server]
-            [strojure.undertow.handler :as handler])
-  (:import (io.undertow.server HttpServerExchange)
-           (io.undertow.util Headers)))
+            [strojure.undertow.handler :as handler]))
 
 (set! *warn-on-reflection* true)
 
@@ -18,12 +16,6 @@
     (reduce (fn [m host] (assoc m host handler))
             vhost-map (webapp :hosts))))
 
-(defn- set-content-type-options
-  [^HttpServerExchange exchange]
-  (let [headers (.getResponseHeaders exchange)]
-    (when (.contains headers Headers/CONTENT_TYPE)
-      (.put headers Headers/X_CONTENT_TYPE_OPTIONS "nosniff"))))
-
 (defn- start-server
   [{:keys [options, webapps, dev/prepare-webapp, dev-mode]}]
   (let [{:keys [host port]} options
@@ -32,7 +24,6 @@
                                              (prepare-webapp webapp)))
                               webapps)]
     (-> (server/start {:handler [{:type handler/graceful-shutdown}
-                                 {:type handler/on-response-commit :listener set-content-type-options}
                                  {:type handler/resource :resource-manager :classpath-files}
                                  {:type handler/proxy-peer-address}
                                  {:type handler/security
