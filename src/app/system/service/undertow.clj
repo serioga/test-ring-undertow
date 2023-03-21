@@ -3,6 +3,7 @@
             [lib.clojure-tools-logging.logger :as logger]
             [lib.clojure.core :as c]
             [strojure.ring-undertow.server :as server]
+            [strojure.undertow.api.exchange :as exchange]
             [strojure.undertow.handler :as handler]))
 
 (set! *warn-on-reflection* true)
@@ -15,6 +16,15 @@
   (let [handler (webapp :handler)]
     (reduce (fn [m host] (assoc m host handler))
             vhost-map (webapp :hosts))))
+
+(def ^:private log-csp-report-handler
+  (-> (fn [exchange]
+        (logger/error (logger/get-logger "csp-report")
+                      (-> (exchange/get-input-stream exchange)
+                          (.readAllBytes)
+                          (String.))))
+      (handler/with-exchange)
+      (handler/dispatch)))
 
 (defn- start-server
   [{:keys [options, webapps, dev/prepare-webapp, dev-mode]}]
@@ -35,7 +45,8 @@
                                                  "frame-ancestors" :none}
                                           dev-mode
                                           (-> (update "script-src" conj :unsafe-eval)
-                                              (assoc "connect-src" [:self "ws:"])))}}
+                                              (assoc "connect-src" ["ws:" :self])))
+                                        :report-handler log-csp-report-handler}}
                                  {:type handler/resource :resource-manager :classpath-files}
                                  {:type handler/proxy-peer-address}
                                  {:type handler/virtual-host
