@@ -33,8 +33,7 @@
         running-webapps (keep (fn [webapp] (when (get webapp :webapp-is-enabled true)
                                              (prepare-webapp webapp)))
                               webapps)]
-    (-> (server/start {:handler [{:type handler/graceful-shutdown}
-                                 {:type handler/security
+    (-> (server/start {:handler [{:type handler/security
                                   :csp {:policy
                                         (cond-> {"default-src" :none
                                                  "script-src" ["http:" "https:" :nonce :strict-dynamic :unsafe-inline]
@@ -49,6 +48,7 @@
                                         :report-handler log-csp-report-handler}}
                                  {:type handler/resource :resource-manager :classpath-files}
                                  {:type handler/proxy-peer-address}
+                                 {:type handler/session}
                                  {:type handler/virtual-host
                                   :host (reduce set-virtual-hosts {} running-webapps)}]
                        :port {port {:host host}}})

@@ -5,7 +5,7 @@
 
                  ;;; ClojureScript (shadow-cljs)
                  [com.google.guava/guava "31.1-jre" :scope "provided"]
-                 [thheller/shadow-cljs "2.22.6" :scope "provided"]
+                 [thheller/shadow-cljs "2.22.7" :scope "provided"]
 
                  ;;; System
                  [integrant "0.8.0"]
@@ -15,7 +15,7 @@
                  ;;; Web Server
                  [com.github.strojure/ring-control "1.0.59"]
                  [com.github.strojure/ring-lib "1.2.2-59"]
-                 [com.github.strojure/ring-undertow "1.0.99"]
+                 [com.github.strojure/ring-undertow "1.1.0-102"]
                  [metosin/reitit-core "0.6.0"]
                  [ring/ring-core "1.9.6"]
                  [ring/ring-defaults "0.3.4"]
